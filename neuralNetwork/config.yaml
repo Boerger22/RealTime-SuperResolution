@@ -1,0 +1,34 @@
+# dataset
+input_lr_folder: "dataset/DIV2K/LR/"
+input_hr_folder: "dataset/DIV2K/HR/"
+
+
+# model configuration
+activation_function: "hard_sigmoid_modified"
+lr_size: [324, 324]
+hr_size: [648, 648]
+model_upscaling_factor: 2
+
+
+# dataset configuration
+training_split: 70
+validation_split: 20
+test_split: 10
+
+max_number_images: 0  # Define a maximum number of images to be used for training
+subimages: 1  # Number of subimages taken from each training image
+
+
+# training configuration
+epochs: 100
+batch_size: 4
+
+model_optimizer: "Adam"
+model_loss: "mean_squared_error"
+
+tf_gpu: true
+
+
+# debug & various
+seed: 123
+save_training_images: false
