@@ -1,6 +1,6 @@
-# dataset
-input_lr_folder: "dataset/DIV2K/LR/"
-input_hr_folder: "dataset/DIV2K/HR/"
+# datasets
+input_lr_folder: "datasets/DIV2K/LR/"
+input_hr_folder: "datasets/DIV2K/HR/"
 
 
 # model configuration

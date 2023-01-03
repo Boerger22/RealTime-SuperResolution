@@ -1,6 +1,7 @@
-/dataset/*
+/datasets/*
 /save/
-!/dataset/README.md
+!/datasets/README.md
+!/datasets/dataset.py
 
 ### Python ###
 # Byte-compiled / optimized / DLL files

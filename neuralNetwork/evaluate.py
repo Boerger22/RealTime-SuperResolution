@@ -1,6 +1,6 @@
-import dataset
+import datasets.dataset as dataset
 import keras
-import metrics
+import utils.metrics as metrics
 import os
 import tensorflow as tf
 import yaml

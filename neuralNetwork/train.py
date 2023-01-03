@@ -1,6 +1,6 @@
-import dataset
+import datasets.dataset as dataset
 import keras
-import metrics
+import utils.metrics as metrics
 import numpy as np
 import random as python_random
 import tensorflow as tf
@@ -8,7 +8,7 @@ import yaml
 
 from datetime import datetime
 from evaluate import evaluate_model
-from model import FSRCNN_s_PReLU
+from FSRCNN.model import FSRCNN_s_PReLU
 from pathlib import Path
 from tensorflow.python.framework.convert_to_constants import (
     convert_variables_to_constants_v2,
