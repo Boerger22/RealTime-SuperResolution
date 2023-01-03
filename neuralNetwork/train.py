@@ -158,13 +158,12 @@ def save_model(model: keras.Model, model_name: str, config: dict, save_config_pa
     print("Saving {} model...".format(model_name))
 
     # Frozen Graph
-    x = tf.TensorSpec(model.input_shape, tf.float32, name="input")
+    x = tf.TensorSpec(model.input_shape, model.inputs[0].dtype, name="input")
 
-    concrete_function = tf.function(
-        lambda x: model(x)).get_concrete_function(x)
+    concrete_function = tf.function(lambda x: model(x)).get_concrete_function(x)
     frozen_model = convert_variables_to_constants_v2(concrete_function)
 
-    tf.io.write_graph(frozen_model.graph, "save/" + model_name + "/frozen_graphs/", "model.pb", as_text=False)
+    tf.io.write_graph(frozen_model.graph, "save/" + model_name + "/frozen_graph/", "model.pb", as_text=False)
 
     # keras model
     model.save("save/" + model_name + "/keras_models/")
