@@ -17,12 +17,12 @@ from tensorflow.python.framework.convert_to_constants import (
 tf.keras.mixed_precision.set_global_policy('mixed_float16')
 
 
-def train(prefix: str = ""):
+def train(config_path: str = "./config.yaml", prefix: str = ""):
     # start timer
     time_start = datetime.now().strftime("%d.%m.%Y-%H:%M:%S")
 
     # read in config
-    with open("./config.yaml", 'r') as stream:
+    with open(config_path, 'r') as stream:
         config = yaml.safe_load(stream)
 
     seed = config["seed"]
@@ -46,7 +46,7 @@ def train(prefix: str = ""):
         metrics=['accuracy', metrics.psnr, metrics.ssim])
 
     # prepare directories and files
-    weights_save_directory, history_path, config_path, evaluation_path = prepareDirectories(config, model_name)
+    weights_save_directory, history_path, save_config_path, evaluation_path = prepareDirectories(config, model_name)
 
     # prepare datasets
     train_dataset, val_dataset, test_dataset = prepareDatasets(config)
@@ -88,7 +88,7 @@ def train(prefix: str = ""):
 
     evaluate_model(model, config, test_dataset, evaluation_path)
 
-    save_model(model, model_name, config, config_path, datasets, callbacks)
+    save_model(model, model_name, config, save_config_path, datasets, callbacks)
 
     # end timer
     time_end = datetime.now().strftime("%d.%m.%Y-%H:%M:%S")
@@ -102,14 +102,14 @@ def prepareDirectories(config: dict, model_name: str):
     # Determine directory for weights saving, history.csv and config
     weights_save_directory = "save/" + model_name + "/" + "weights/"
     history_path = "save/" + model_name + "/history/"
-    config_path = "save/" + model_name + "/config/"
+    save_config_path = "save/" + model_name + "/config/"
     evaluation_path = "save/" + model_name + "/evaluation/"
 
     # Check if paths and files exist
     Path(weights_save_directory).mkdir(parents=True, exist_ok=True)
     Path(history_path).mkdir(parents=True, exist_ok=True)
     Path(history_path + "/history.csv").touch(exist_ok=True)
-    Path(config_path).mkdir(parents=True, exist_ok=True)
+    Path(save_config_path).mkdir(parents=True, exist_ok=True)
     Path(evaluation_path).mkdir(parents=True, exist_ok=True)
     if(config["save_training_images"]):
         Path("data/debugImages/LR/train/").mkdir(parents=True, exist_ok=True)
@@ -119,12 +119,11 @@ def prepareDirectories(config: dict, model_name: str):
         Path("data/debugImages/HR/val/").mkdir(parents=True, exist_ok=True)
         Path("data/debugImages/HR/test/").mkdir(parents=True, exist_ok=True)
 
-    return weights_save_directory, history_path, config_path, evaluation_path
+    return weights_save_directory, history_path, save_config_path, evaluation_path
 
 
 def prepareDatasets(config: dict):
     print("Preparing datasets")
-    print("Number of images taken for whole training: ", config["max_number_images"])
 
     # Prepare training-, validation-, and test-dataset
     train_dataset = dataset.Dataset(set_type="train")
@@ -154,9 +153,7 @@ def evaluate_model(model: keras.Model, config: dict, test_dataset: dataset, eval
         yaml.dump(evaluation, evaluation_file, default_flow_style=False)
 
 
-def save_model(
-        model: keras.Model, model_name: str, config: dict, config_path: str, datasets: list,
-        callbacks):
+def save_model(model: keras.Model, model_name: str, config: dict, save_config_path: str, datasets: list, callbacks):
     # Saving
     print("Saving {} model...".format(model_name))
 
@@ -177,7 +174,7 @@ def save_model(
     config["val_dataset_size"] = len(datasets[1].hr_images)
     config["test_dataset_size"] = len(datasets[2].hr_images)
     config["callbacks"] = list(map(lambda callback: str(callback).split(" object")[0].replace("<", ""), callbacks))
-    with open(config_path + "config.yaml", "w") as output_file:
+    with open(save_config_path + "config.yaml", "w") as output_file:
         yaml.dump(config, output_file, default_flow_style=False)
 
     print("Saving {} model done!".format(model_name))
