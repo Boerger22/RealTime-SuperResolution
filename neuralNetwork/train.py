@@ -166,7 +166,7 @@ def save_model(model: keras.Model, model_name: str, config: dict, save_config_pa
     tf.io.write_graph(frozen_model.graph, "save/" + model_name + "/frozen_graph/", "model.pb", as_text=False)
 
     # keras model
-    model.save("save/" + model_name + "/keras_models/")
+    model.save("save/" + model_name + "/keras_model/")
 
     # save model config
     config["train_dataset_size"] = len(datasets[0].hr_images)
