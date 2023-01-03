@@ -52,27 +52,6 @@ def load_keras_model(model_path: str):
     return keras.models.load_model(model_path, custom_objects={"psnr": metrics.psnr, "ssim": metrics.ssim})
 
 
-def load_frozen_graph():
-    with tf.io.gfile.GFile("save/frozen_graphsFSRCNN_s_PReLU_800_600_x2_20ep/model.pb", "rb") as f:
-        graph_def = tf.compat.v1.GraphDef()
-        graph_def.ParseFromString(f.read())
-
-    frozen_func = wrap_frozen_graph(graph_def=graph_def,
-                                    inputs=["input:0"],
-                                    outputs=["Identity:0"],
-                                    print_graph=True)
-    return frozen_func
-
-
-def wrap_frozen_graph(graph_def, inputs, outputs):
-    wrapped_import = tf.compat.v1.wrap_function(tf.compat.v1.import_graph_def(graph_def, name=""), [])
-    import_graph = wrapped_import.graph
-
-    return wrapped_import.prune(
-        tf.nest.map_structure(import_graph.as_graph_element, inputs),
-        tf.nest.map_structure(import_graph.as_graph_element, outputs))
-
-
 def find_config(model_path):
     print("Searching for config.yaml in model_path.")
     for root, dirs, files in os.walk(model_path.split("keras_models/")[0]):
