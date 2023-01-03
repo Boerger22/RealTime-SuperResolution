@@ -14,8 +14,6 @@ def main():
 
     # test parser
     test_parser = subparsers.add_parser("test")
-    # args = parser.parse_args()
-
     test_parser.add_argument("--model_path", type=str, required=True)
     test_parser.add_argument("--eval_path", type=str)
     test_parser.add_argument("--config", type=str)

@@ -17,6 +17,7 @@ def evaluate(model_path: str, config_path: str, evaluation_path: str = None):
         # try to search for config file in model path
         config_path = find_config(model_path)
 
+        # create test set according to found config or a default config
         test_dataset = create_test_set(config_path)
 
         if evaluation_path == None:
