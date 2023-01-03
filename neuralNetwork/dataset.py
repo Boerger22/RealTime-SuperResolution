@@ -1,19 +1,18 @@
+import albumentations as A
 import math
+import numpy as np
 import os
 import random
 import yaml
 
-import albumentations as A
-import numpy as np
-from PIL import Image
-
-from tensorflow import keras
-
+from pathlib import Path
 from matplotlib import pyplot as plt
+from PIL import Image
+from tensorflow import keras
 
 
 class Dataset(keras.utils.Sequence):
-    def __init__(self, set_type: str, path: str = ""):
+    def __init__(self, set_type: str, path: str = "", seeding: bool = False):
         # load parameters from config
         with open(path + "./config.yaml", "r") as stream:
             config = yaml.safe_load(stream)
@@ -27,6 +26,14 @@ class Dataset(keras.utils.Sequence):
         self.BATCH_SIZE = config["batch_size"]
         self.LR_IMG_FOLDER = config["input_lr_folder"]
         self.HR_IMG_FOLDER = config["input_hr_folder"]
+
+        if seeding:
+            random.seed(config["seed"])
+
+        if self.SAVE_TRAINING_IMAGES:
+            # prepare folder
+            Path("data/debugImages/LR/" + self.set_type + "/").mkdir(parents=True, exist_ok=True)
+            Path("data/debugImages/HR/" + self.set_type + "/").mkdir(parents=True, exist_ok=True)
 
         # prepare transformation for scale
         self.transform = A.ToFloat(max_value=255)
