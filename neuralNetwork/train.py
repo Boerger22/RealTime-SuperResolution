@@ -7,6 +7,7 @@ import tensorflow as tf
 import yaml
 
 from datetime import datetime
+from evaluate import evaluate_model
 from model import FSRCNN_s_PReLU
 from pathlib import Path
 from tensorflow.python.framework.convert_to_constants import (
@@ -86,7 +87,7 @@ def train(config_path: str = "./config.yaml", prefix: str = ""):
         )
     print("Training for {} done!".format(model_name))
 
-    evaluate_model(model, config, test_dataset, evaluation_path)
+    evaluate_model(model, test_dataset, model_name, evaluation_path)
 
     save_model(model, model_name, config, save_config_path, datasets, callbacks)
 
@@ -141,16 +142,6 @@ def prepareDatasets(config: dict):
     print("Preparing datasets done!")
 
     return train_dataset, val_dataset, test_dataset
-
-
-def evaluate_model(model: keras.Model, config: dict, test_dataset: dataset, evaluation_path: str):
-    if(config["test_split"] != 0):
-        result = model.evaluate(test_dataset)
-        evaluation = dict(zip(model.metrics_names, result))
-
-    # Evaluation
-    with open(evaluation_path + "evaluation.yaml", "w") as evaluation_file:
-        yaml.dump(evaluation, evaluation_file, default_flow_style=False)
 
 
 def save_model(model: keras.Model, model_name: str, config: dict, save_config_path: str, datasets: list, callbacks):
