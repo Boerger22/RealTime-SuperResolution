@@ -1,5 +1,6 @@
-/dataset/
+/dataset/*
 /save/
+!/dataset/README.md
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
