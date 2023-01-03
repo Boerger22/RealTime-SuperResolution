@@ -6,6 +6,7 @@ import tensorflow as tf
 
 tf.keras.mixed_precision.set_global_policy('mixed_float16')
 
+
 def hard_sigmoid_modified(x):
     zero = tf.constant(0., dtype=x.dtype.base_dtype)
     one = tf.constant(1., dtype=x.dtype.base_dtype)
@@ -13,18 +14,25 @@ def hard_sigmoid_modified(x):
     x = tf.clip_by_value(x, zero, one)
     return x
 
+
 get_custom_objects().update({'hard_sigmoid_modified': Activation(hard_sigmoid_modified)})
+
 
 class FSRCNN_s_PReLU():
     def __init__(self):
         with open("config.yaml", 'r') as stream:
             config = yaml.safe_load(stream)
 
-        assert (config["lr_size"][0] * config["model_upscaling_factor"] == config["hr_size"][0]), "The upscaling factor does not correspond to the given input and output size."
-        assert (config["lr_size"][1] * config["model_upscaling_factor"] == config["hr_size"][1]), "The upscaling factor does not correspond to the given input and output size."
+        assert (config["lr_size"][0] * config["model_upscaling_factor"] == config["hr_size"][0]
+                ), "The upscaling factor does not correspond to the given input and output size."
+        assert (config["lr_size"][1] * config["model_upscaling_factor"] == config["hr_size"][1]
+                ), "The upscaling factor does not correspond to the given input and output size."
 
         self.model_name = "FSRCNN"
-        self.model = self.init_model(lr_size=config["lr_size"], upscaling_factor=config["model_upscaling_factor"], activation_function=config["activation_function"])
+        self.model = self.init_model(
+            lr_size=config["lr_size"],
+            upscaling_factor=config["model_upscaling_factor"],
+            activation_function=config["activation_function"])
 
     def init_model(self, lr_size: tuple, upscaling_factor: int, activation_function: str):
         lr_input = Input(shape=(lr_size[0], lr_size[1], 3))
@@ -45,7 +53,8 @@ class FSRCNN_s_PReLU():
 
         expanding_prelu = PReLU(shared_axes=[1, 2])(expanding_conv)
 
-        deconvolution = Conv2DTranspose(kernel_size=9, filters=3, strides=upscaling_factor, padding="same", activation=activation_function, dtype="float32")(expanding_prelu)
+        deconvolution = Conv2DTranspose(kernel_size=9, filters=3, strides=upscaling_factor,
+                                        padding="same", activation=activation_function, dtype="float32")(expanding_prelu)
 
         return Model(inputs=lr_input, outputs=deconvolution)
 
