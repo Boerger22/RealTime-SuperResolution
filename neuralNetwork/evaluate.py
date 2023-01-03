@@ -20,7 +20,7 @@ def evaluate(model_path: str, config_path: str, evaluation_path: str = None):
         test_dataset = create_test_set(config_path)
 
         if evaluation_path == None:
-            evaluation_path = model_path.split("keras_model/")[0].split("save/")[1]
+            evaluation_path = model_path.split("keras_model/")[0].split("save/")[1][:-1]
     else:
         print("The model could not be evaluated because neither a data set nor a configuration was given.")
         exit()
