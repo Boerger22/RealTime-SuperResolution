@@ -18,13 +18,14 @@ def main():
 
     test_parser.add_argument("--model_path", type=str, required=True)
     test_parser.add_argument("--eval_path", type=str)
+    test_parser.add_argument("--config", type=str)
 
     args = parser.parse_args()
 
     if args.mode == "train":
         train(config_path=args.config)
     elif args.mode == "test":
-        evaluate(model_path=args.model_path, config_path=None, evaluation_path=args.eval_path)
+        evaluate(model_path=args.model_path, config_path=args.config, evaluation_path=args.eval_path)
     else:
         print("Please specify a valid argument.")
         exit()
