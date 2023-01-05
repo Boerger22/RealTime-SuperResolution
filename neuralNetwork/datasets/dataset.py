@@ -32,8 +32,8 @@ class Dataset(keras.utils.Sequence):
 
         if self.SAVE_TRAINING_IMAGES:
             # prepare folder
-            Path("datasest/debugImages/LR/" + self.set_type + "/").mkdir(parents=True, exist_ok=True)
-            Path("datasest/debugImages/HR/" + self.set_type + "/").mkdir(parents=True, exist_ok=True)
+            Path("datasets/debugImages/LR/" + self.set_type + "/").mkdir(parents=True, exist_ok=True)
+            Path("datasets/debugImages/HR/" + self.set_type + "/").mkdir(parents=True, exist_ok=True)
 
         # prepare transformation for scale
         self.transform = A.ToFloat(max_value=255)
@@ -109,10 +109,10 @@ class Dataset(keras.utils.Sequence):
 
                 if(self.SAVE_TRAINING_IMAGES):  # for debugging training images
                     lr_cropped.save(
-                        "datasest/debugImages/LR/" + self.set_type + "/" + lr_image.filename.split(".png")[0].split("/")
+                        "datasets/debugImages/LR/" + self.set_type + "/" + lr_image.filename.split(".png")[0].split("/")
                         [-1] + ".png")
                     hr_cropped.save(
-                        "datasest/debugImages/HR/" + self.set_type + "/" + hr_image.filename.split(".png")[0].split("/")
+                        "datasets/debugImages/HR/" + self.set_type + "/" + hr_image.filename.split(".png")[0].split("/")
                         [-1] + ".png")
 
         return (batch_lr_images, batch_hr_images)

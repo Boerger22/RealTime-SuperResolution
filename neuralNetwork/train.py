@@ -113,12 +113,12 @@ def prepareDirectories(config: dict, model_name: str):
     Path(save_config_path).mkdir(parents=True, exist_ok=True)
     Path(evaluation_path).mkdir(parents=True, exist_ok=True)
     if(config["save_training_images"]):
-        Path("datasest/debugImages/LR/train/").mkdir(parents=True, exist_ok=True)
-        Path("datasest/debugImages/LR/val/").mkdir(parents=True, exist_ok=True)
-        Path("datasest/debugImages/LR/test/").mkdir(parents=True, exist_ok=True)
-        Path("datasest/debugImages/HR/train/").mkdir(parents=True, exist_ok=True)
-        Path("datasest/debugImages/HR/val/").mkdir(parents=True, exist_ok=True)
-        Path("datasest/debugImages/HR/test/").mkdir(parents=True, exist_ok=True)
+        Path("datasets/debugImages/LR/train/").mkdir(parents=True, exist_ok=True)
+        Path("datasets/debugImages/LR/val/").mkdir(parents=True, exist_ok=True)
+        Path("datasets/debugImages/LR/test/").mkdir(parents=True, exist_ok=True)
+        Path("datasets/debugImages/HR/train/").mkdir(parents=True, exist_ok=True)
+        Path("datasets/debugImages/HR/val/").mkdir(parents=True, exist_ok=True)
+        Path("datasets/debugImages/HR/test/").mkdir(parents=True, exist_ok=True)
 
     return weights_save_directory, history_path, save_config_path, evaluation_path
 
