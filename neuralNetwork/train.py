@@ -89,7 +89,7 @@ def train(config_path: str = "./config.yaml", prefix: str = ""):
         )
     print("Training for {} done!".format(model_name))
 
-    evaluate_model(model, test_dataset, model_name, evaluation_path)
+    evaluate_model(model, test_dataset, evaluation_path)
 
     save_model(model, model_name, config, save_config_path, datasets, callbacks)
 
