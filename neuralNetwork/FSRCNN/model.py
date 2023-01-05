@@ -31,30 +31,37 @@ class FSRCNN_s_PReLU():
         self.model_name = "FSRCNN"
         self.model = self.init_model(
             lr_size=config["lr_size"],
+            feature_number=config["feature_number"],
+            shrunk_feature_number=config["shrunk_feature_number"],
+            color_channels=config["color_channels"],
             upscaling_factor=config["model_upscaling_factor"],
             activation_function=config["activation_function"])
 
-    def init_model(self, lr_size: tuple, upscaling_factor: int, activation_function: str):
-        lr_input = Input(shape=(lr_size[0], lr_size[1], 3))
+    def init_model(
+            self, lr_size: tuple, feature_number: int, shrunk_feature_number: int, color_channels: int,
+            upscaling_factor: int, activation_function: str):
+        lr_input = Input(shape=(lr_size[0], lr_size[1], color_channels))
 
-        feature_extraction_conv = Conv2D(kernel_size=5, filters=32, padding="same")(lr_input)
+        feature_extraction_conv = Conv2D(kernel_size=5, filters=feature_number, padding="same")(lr_input)
 
         feature_extraction_prelu = PReLU(shared_axes=[1, 2])(feature_extraction_conv)
 
-        shrinking_conv = Conv2D(kernel_size=1, filters=5, padding="same")(feature_extraction_prelu)
+        shrinking_conv = Conv2D(kernel_size=1, filters=shrunk_feature_number,
+                                padding="same")(feature_extraction_prelu)
 
         shrinking_prelu = PReLU(shared_axes=[1, 2])(shrinking_conv)
 
-        mapping_conv = Conv2D(kernel_size=3, filters=5, padding="same")(shrinking_prelu)
+        mapping_conv = Conv2D(kernel_size=3, filters=shrunk_feature_number, padding="same")(shrinking_prelu)
 
         mapping_prelu = PReLU(shared_axes=[1, 2])(mapping_conv)
 
-        expanding_conv = Conv2D(kernel_size=1, filters=32)(mapping_prelu)
+        expanding_conv = Conv2D(kernel_size=1, filters=feature_number)(mapping_prelu)
 
         expanding_prelu = PReLU(shared_axes=[1, 2])(expanding_conv)
 
-        deconvolution = Conv2DTranspose(kernel_size=9, filters=3, strides=upscaling_factor,
-                                        padding="same", activation=activation_function, dtype="float32")(expanding_prelu)
+        deconvolution = Conv2DTranspose(
+            kernel_size=9, filters=color_channels, strides=upscaling_factor, padding="same",
+            activation=activation_function, dtype="float32")(expanding_prelu)
 
         return Model(inputs=lr_input, outputs=deconvolution)
 

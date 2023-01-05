@@ -8,6 +8,9 @@ activation_function: "hard_sigmoid_modified"
 lr_size: [324, 324]
 hr_size: [648, 648]
 model_upscaling_factor: 2
+feature_number: 32
+shrunk_feature_number: 5
+color_channels: 3
 
 
 # dataset configuration
