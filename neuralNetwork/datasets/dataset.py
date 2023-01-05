@@ -12,9 +12,9 @@ from tensorflow import keras
 
 
 class Dataset(keras.utils.Sequence):
-    def __init__(self, set_type: str, path: str = "", seeding: bool = False):
+    def __init__(self, set_type: str, config_file: str = "./config.yaml", seeding: bool = False):
         # load parameters from config
-        with open(path + "./config.yaml", "r") as stream:
+        with open(config_file, "r") as stream:
             config = yaml.safe_load(stream)
         self.set_type = set_type
         self.MAX_IMAGES = config["max_number_images"]

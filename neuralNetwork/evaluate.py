@@ -8,15 +8,12 @@ import yaml
 from pathlib import Path
 
 
-def evaluate(model_path: str, seeding: bool, config_path: str = None, evaluation_path: str = None):
+def evaluate(model_path: str, seeding: bool, evaluation_path: str, config_file: str = None):
     # load model
     model = load_keras_model(model_path)
 
     # check whether a config is given such that a test_set according to the config can be used. Otherwise, a default test_set has to be created
-    test_dataset = create_test_set(seeding, config_path)
-
-    if evaluation_path == None:
-        evaluation_path = "save/" + model_path.split("keras_model/")[0].split("save/")[1][:-1] + "/evaluation/"
+    test_dataset = create_test_set(seeding, config_file)
 
     if len(test_dataset.hr_images) > 0:  # only test on dataset if size > 0
         evaluate_model(model, test_dataset, evaluation_path)
@@ -41,9 +38,10 @@ def load_keras_model(model_path: str):
     return keras.models.load_model(model_path, custom_objects={"psnr": metrics.psnr, "ssim": metrics.ssim})
 
 
-def create_test_set(seeding, config_path: str = ""):
-    if config_path != None:
-        test_dataset = dataset.Dataset(set_type="test", path=config_path, seeding=seeding)
+def create_test_set(seeding, config_file: str = ""):
+    if config_file != None:
+        print("Found the existing config.yaml. Creating the test set according to config.")
+        test_dataset = dataset.Dataset(set_type="test", config_file=config_file, seeding=seeding)
     else:
         print("Couldnt find config. Using the default configuration file.")
         test_dataset = dataset.Dataset(set_type="test", seeding=seeding)

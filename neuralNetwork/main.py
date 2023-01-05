@@ -15,17 +15,17 @@ def main():
     # test parser
     test_parser = subparsers.add_parser("test")
     test_parser.add_argument("--model_path", type=str, required=True)
-    test_parser.add_argument("--eval_path", type=str, required=True)
+    test_parser.add_argument("--eval_path", type=str, default="./")
     test_parser.add_argument("--config", type=str)
     test_parser.add_argument("--seeding", type=bool, default=True)
 
     args = parser.parse_args()
 
     if args.mode == "train":
-        train(config_path=args.config)
+        train(config_file=args.config)
     elif args.mode == "test":
         evaluate(model_path=args.model_path, seeding=args.seeding,
-                 config_path=args.config, evaluation_path=args.eval_path)
+                 evaluation_path=args.eval_path, config_file=args.config)
     else:
         print("Please specify a valid argument.")
         exit()

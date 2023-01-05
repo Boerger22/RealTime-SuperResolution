@@ -18,12 +18,12 @@ from tensorflow.python.framework.convert_to_constants import (
 tf.keras.mixed_precision.set_global_policy('mixed_float16')
 
 
-def train(config_path: str = "./config.yaml", prefix: str = ""):
+def train(config_file: str = "./config.yaml", prefix: str = ""):
     # start timer
     time_start = datetime.now().strftime("%d.%m.%Y-%H:%M:%S")
 
     # read in config
-    with open(config_path, 'r') as stream:
+    with open(config_file, 'r') as stream:
         config = yaml.safe_load(stream)
 
     seeding = config["seeding"]
