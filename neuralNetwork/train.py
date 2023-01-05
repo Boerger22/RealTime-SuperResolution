@@ -52,7 +52,7 @@ def train(config_path: str = "./config.yaml", prefix: str = ""):
     weights_save_directory, history_path, save_config_path, evaluation_path = prepareDirectories(config, model_name)
 
     # prepare datasets
-    train_dataset, val_dataset, test_dataset = prepareDatasets(config)
+    train_dataset, val_dataset, test_dataset = prepareDatasets(config, seeding)
 
     # wrap datasets
     datasets = [train_dataset, val_dataset, test_dataset]
