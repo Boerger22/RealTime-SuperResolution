@@ -1,4 +1,4 @@
-import train
+from train import train
 import yaml
 
 
@@ -13,7 +13,7 @@ def train_schedule():
 
         with open("./config.yaml", "w") as output_file:
             yaml.dump(config, output_file, default_flow_style=False)
-        train(str(i))
+        train(prefix=str(i))
 
 
 if __name__ == "__main__":
