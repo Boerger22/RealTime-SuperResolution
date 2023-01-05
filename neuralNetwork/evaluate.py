@@ -1,8 +1,8 @@
 import datasets.dataset as dataset
 import keras
-import utils.metrics as metrics
 import os
 import tensorflow as tf
+import utils.metrics as metrics
 import yaml
 
 from pathlib import Path
