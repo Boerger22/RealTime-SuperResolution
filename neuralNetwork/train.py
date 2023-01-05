@@ -26,12 +26,14 @@ def train(config_path: str = "./config.yaml", prefix: str = ""):
     with open(config_path, 'r') as stream:
         config = yaml.safe_load(stream)
 
-    seed = config["seed"]
+    seeding = config["seeding"]
 
-    # set seeds
-    np.random.seed(seed)
-    python_random.seed(seed)
-    tf.random.set_seed(seed)
+    if seeding:
+        seed = config["seed"]
+        # set seeds
+        np.random.seed(seed)
+        python_random.seed(seed)
+        tf.random.set_seed(seed)
 
     # define model
     gpu_string = "GPU" if config["tf_gpu"] else "CPU"
@@ -50,7 +52,7 @@ def train(config_path: str = "./config.yaml", prefix: str = ""):
     weights_save_directory, history_path, save_config_path, evaluation_path = prepareDirectories(config, model_name)
 
     # prepare datasets
-    train_dataset, val_dataset, test_dataset = prepareDatasets(config)
+    train_dataset, val_dataset, test_dataset = prepareDatasets(config, seeding)
 
     # wrap datasets
     datasets = [train_dataset, val_dataset, test_dataset]
@@ -123,13 +125,13 @@ def prepareDirectories(config: dict, model_name: str):
     return weights_save_directory, history_path, save_config_path, evaluation_path
 
 
-def prepareDatasets(config: dict):
+def prepareDatasets(config: dict, seeding: bool):
     print("Preparing datasets")
 
     # Prepare training-, validation-, and test-dataset
-    train_dataset = dataset.Dataset(set_type="train")
-    val_dataset = dataset.Dataset(set_type="val")
-    test_dataset = dataset.Dataset(set_type="test")
+    train_dataset = dataset.Dataset(set_type="train", seeding=seeding)
+    val_dataset = dataset.Dataset(set_type="val", seeding=seeding)
+    test_dataset = dataset.Dataset(set_type="test", seeding=seeding)
 
     train_dataset_size = len(train_dataset.hr_images)
     val_dataset_size = len(val_dataset.hr_images)

@@ -38,34 +38,7 @@ class Dataset(keras.utils.Sequence):
         # prepare transformation for scale
         self.transform = A.ToFloat(max_value=255)
 
-        # get image names from the folders
-        self.hr_images = np.sort([x for x in os.listdir(
-            self.HR_IMG_FOLDER) if x.endswith(".png")])
-        self.lr_images = np.sort([x for x in os.listdir(
-            self.LR_IMG_FOLDER) if x.endswith(".png")])
-
-        # take only a specified number of images for datasets
-        if(self.MAX_IMAGES != 0):
-            self.hr_images = self.hr_images[:self.MAX_IMAGES]
-            self.lr_images = self.lr_images[:self.MAX_IMAGES]
-
-        # Define dataset splits
-        training_size = int(len(self.lr_images) * (config["training_split"] / 100))
-
-        validation_size = int(len(self.lr_images) * (config["validation_split"] / 100))
-
-        test_size = int(len(self.hr_images) * (config["test_split"] / 100))
-
-        # initialize images according to splits
-        if self.set_type == "train":
-            self.lr_images = self.lr_images[:training_size]
-            self.hr_images = self.hr_images[:training_size]
-        elif self.set_type == "val":
-            self.lr_images = self.lr_images[training_size:training_size + validation_size]
-            self.hr_images = self.hr_images[training_size:training_size + validation_size]
-        else:
-            self.lr_images = self.lr_images[-test_size:]
-            self.hr_images = self.hr_images[-test_size:]
+        self.initialize_dataset(config)
 
         # number of LR images should be the same as number of HR images
         assert len(self.lr_images) == len(
@@ -75,15 +48,45 @@ class Dataset(keras.utils.Sequence):
         return math.ceil(len(self.hr_images) / self.BATCH_SIZE)
 
     def __getitem__(self, idx):
-        # tmp lists hold the image names for the current batch
-        batch_lr_images_tmp = self.lr_images[idx * self.BATCH_SIZE:(idx + 1) * self.BATCH_SIZE]
-        batch_hr_images_tmp = self.hr_images[idx * self.BATCH_SIZE:(idx + 1) * self.BATCH_SIZE]
+        batch_lr_images = self.lr_images[idx * self.BATCH_SIZE:(idx + 1) * self.BATCH_SIZE]
+        batch_hr_images = self.hr_images[idx * self.BATCH_SIZE:(idx + 1) * self.BATCH_SIZE]
 
-        # create np.arrays of zeros, which are going to get filled
-        batch_lr_images = np.empty((0, self.LR_IMG_SIZE[1], self.LR_IMG_SIZE[0], 3))
-        batch_hr_images = np.empty((0, self.HR_IMG_SIZE[1], self.HR_IMG_SIZE[0], 3))
+        return (batch_lr_images, batch_hr_images)
 
-        for im1, im2, in zip(batch_lr_images_tmp, batch_hr_images_tmp):
+    def initialize_dataset(self, config):
+        self.lr_images = np.empty((0, self.LR_IMG_SIZE[1], self.LR_IMG_SIZE[0], 3))
+        self.hr_images = np.empty((0, self.HR_IMG_SIZE[1], self.HR_IMG_SIZE[0], 3))
+
+        # get image names from the folders
+        self.hr_image_filenames = np.sort([x for x in os.listdir(
+            self.HR_IMG_FOLDER) if x.endswith(".png")])
+        self.lr_image_filenames = np.sort([x for x in os.listdir(
+            self.LR_IMG_FOLDER) if x.endswith(".png")])
+
+        # take only a specified number of images for datasets
+        if(self.MAX_IMAGES != 0):
+            self.hr_image_filenames = self.hr_image_filenames[:self.MAX_IMAGES]
+            self.lr_image_filenames = self.lr_image_filenames[:self.MAX_IMAGES]
+
+        # Define dataset splits
+        training_size = int(len(self.lr_image_filenames) * (config["training_split"] / 100))
+
+        validation_size = int(len(self.lr_image_filenames) * (config["validation_split"] / 100))
+
+        test_size = int(len(self.lr_image_filenames) * (config["test_split"] / 100))
+
+        # initialize images according to splits
+        if self.set_type == "train":
+            self.hr_image_filenames = self.hr_image_filenames[:training_size]
+            self.lr_image_filenames = self.lr_image_filenames[:training_size]
+        elif self.set_type == "val":
+            self.hr_image_filenames = self.hr_image_filenames[training_size:training_size + validation_size]
+            self.lr_image_filenames = self.lr_image_filenames[training_size:training_size + validation_size]
+        else:
+            self.hr_image_filenames = self.hr_image_filenames[-test_size:]
+            self.lr_image_filenames = self.lr_image_filenames[-test_size:]
+
+        for im1, im2 in zip(self.lr_image_filenames, self.hr_image_filenames):
             # get LR und HR image
             lr_image = Image.open(os.path.join(self.LR_IMG_FOLDER, im1))
             hr_image = Image.open(os.path.join(self.HR_IMG_FOLDER, im2))
@@ -97,22 +100,21 @@ class Dataset(keras.utils.Sequence):
                 y_rand = random.randint(0, max_height) if max_height >= 0 else 0
 
                 # cropping
-                lr_cropped = lr_image.crop((x_rand, y_rand, x_rand + self.LR_IMG_SIZE[0], y_rand + self.LR_IMG_SIZE[1]))
                 hr_cropped = hr_image.crop(
                     (x_rand * 2, y_rand * 2, x_rand * 2 + self.HR_IMG_SIZE[0],
                      y_rand * 2 + self.HR_IMG_SIZE[1]))
+                lr_cropped = lr_image.crop(
+                    (x_rand, y_rand, x_rand + self.LR_IMG_SIZE[0], y_rand + self.LR_IMG_SIZE[1]))
 
-                batch_lr_images = np.append(batch_lr_images, [self.transform(
-                    image=np.array(lr_cropped))["image"]], axis=0)
-                batch_hr_images = np.append(batch_hr_images, [self.transform(
+                self.hr_images = np.append(self.hr_images, [self.transform(
                     image=np.array(hr_cropped))["image"]], axis=0)
+                self.lr_images = np.append(self.lr_images, [self.transform(
+                    image=np.array(lr_cropped))["image"]], axis=0)
 
-                if(self.SAVE_TRAINING_IMAGES):  # for debugging training images
+                if self.SAVE_TRAINING_IMAGES:  # for debugging training images
                     lr_cropped.save(
                         "datasets/debugImages/LR/" + self.set_type + "/" + lr_image.filename.split(".png")[0].split("/")
                         [-1] + ".png")
                     hr_cropped.save(
                         "datasets/debugImages/HR/" + self.set_type + "/" + hr_image.filename.split(".png")[0].split("/")
                         [-1] + ".png")
-
-        return (batch_lr_images, batch_hr_images)
