@@ -33,13 +33,14 @@ class FSRCNN_s_PReLU():
             lr_size=config["lr_size"],
             feature_number=config["feature_number"],
             shrunk_feature_number=config["shrunk_feature_number"],
+            mapping_layer_number=config["mapping_layer_number"],
             color_channels=config["color_channels"],
             upscaling_factor=config["model_upscaling_factor"],
             activation_function=config["activation_function"])
 
     def init_model(
-            self, lr_size: tuple, feature_number: int, shrunk_feature_number: int, color_channels: int,
-            upscaling_factor: int, activation_function: str):
+            self, lr_size: tuple, feature_number: int, shrunk_feature_number: int, mapping_layer_number: int,
+            color_channels: int, upscaling_factor: int, activation_function: str):
         lr_input = Input(shape=(lr_size[0], lr_size[1], color_channels))
 
         feature_extraction_conv = Conv2D(kernel_size=5, filters=feature_number, padding="same")(lr_input)
@@ -51,11 +52,12 @@ class FSRCNN_s_PReLU():
 
         shrinking_prelu = PReLU(shared_axes=[1, 2])(shrinking_conv)
 
-        mapping_conv = Conv2D(kernel_size=3, filters=shrunk_feature_number, padding="same")(shrinking_prelu)
+        tmp = shrinking_prelu
+        for i in range(mapping_layer_number):
+            tmp = Conv2D(kernel_size=3, filters=shrunk_feature_number, padding="same")(tmp)
+            tmp = PReLU(shared_axes=[1, 2])(tmp)
 
-        mapping_prelu = PReLU(shared_axes=[1, 2])(mapping_conv)
-
-        expanding_conv = Conv2D(kernel_size=1, filters=feature_number)(mapping_prelu)
+        expanding_conv = Conv2D(kernel_size=1, filters=feature_number)(tmp)
 
         expanding_prelu = PReLU(shared_axes=[1, 2])(expanding_conv)
 
