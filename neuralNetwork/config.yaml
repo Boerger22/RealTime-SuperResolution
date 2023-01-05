@@ -30,5 +30,6 @@ tf_gpu: true
 
 
 # debug & various
+seeding: true
 seed: 123
 save_training_images: false
